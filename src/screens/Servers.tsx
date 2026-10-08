@@ -1,13 +1,15 @@
 import { useEffect, useState } from 'react';
 import { headersToLines, parseHeaderLines, validateHeaders } from '../lib/secrets';
 import { newId } from '../lib/storage';
-import type { ServerEntry } from '../lib/storage';
+import type { Secrets, ServerEntry } from '../lib/storage';
+import { Journal } from '../components/Journal';
 import type { TestReport } from '../lib/mcp';
 
 interface Props {
   servers: ServerEntry[];
   activeId: string | null;
   busy: boolean;
+  secrets: Secrets;
   draft: Partial<ServerEntry> | null;
   onSave: (servers: ServerEntry[]) => Promise<void>;
   onConnect: (server: ServerEntry) => void;
@@ -17,7 +19,7 @@ interface Props {
   onDraftConsumed: () => void;
 }
 
-export function ServersScreen({ servers, activeId, busy, draft, onSave, onConnect, onDisconnect, onTest, onNotify, onDraftConsumed }: Props) {
+export function ServersScreen({ servers, activeId, busy, secrets, draft, onSave, onConnect, onDisconnect, onTest, onNotify, onDraftConsumed }: Props) {
   const [editing, setEditing] = useState<ServerEntry | null>(null);
   const [open, setOpen] = useState(false);
   const [name, setName] = useState('');
@@ -136,6 +138,8 @@ export function ServersScreen({ servers, activeId, busy, draft, onSave, onConnec
           </div>
         </div>
       ))}
+
+      <Journal secrets={secrets} />
     </section>
   );
 }

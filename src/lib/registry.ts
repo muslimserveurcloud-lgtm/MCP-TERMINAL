@@ -1,3 +1,5 @@
+import { nativeFetch } from './http';
+
 const BASE = 'https://registry.modelcontextprotocol.io';
 
 /** Mots-clés de recherche (pas une liste de serveurs) : le registre officiel est interrogé en direct. */
@@ -54,7 +56,7 @@ async function page(search: string | undefined, limit: number): Promise<Registry
   const url = new URL('/v0.1/servers', BASE);
   url.searchParams.set('limit', String(limit));
   if (search) url.searchParams.set('search', search);
-  const response = await window.fetch(url.toString(), { headers: { accept: 'application/json' } });
+  const response = await nativeFetch(url.toString(), { headers: { accept: 'application/json' } });
   if (!response.ok) throw new Error(`Le registre MCP a répondu HTTP ${response.status}.`);
   const json = asObj(await response.json());
   const servers = Array.isArray(json?.['servers']) ? json['servers'] : [];

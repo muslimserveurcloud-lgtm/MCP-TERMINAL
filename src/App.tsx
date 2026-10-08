@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
+import { describeError, log } from './lib/http';
 import { closeSession, connectServer, listPrompts, listResources, listTools, testServer } from './lib/mcp';
 import type { PromptInfo, ResourceInfo, Session, ToolInfo } from './lib/mcp';
 import { redact } from './lib/secrets';
@@ -37,12 +38,15 @@ export default function App() {
 
   const notify = useCallback((text: string, kind: 'ok' | 'error' = 'ok') => {
     setToast({ text, kind });
-    window.setTimeout(() => setToast(null), 5000);
+    // Les erreurs restent affichées jusqu'à un appui (pour avoir le temps de faire une capture).
+    if (kind === 'ok') window.setTimeout(() => setToast(null), 4000);
   }, []);
 
   /** Toute erreur affichée est purgée des secrets du Coffre. */
   const fail = useCallback((error: unknown) => {
-    notify(redact(error instanceof Error ? error.message : String(error), secrets), 'error');
+    const text = redact(describeError(error), secrets);
+    log(`✖ ${text}`);
+    notify(text.length > 500 ? `${text.slice(0, 500)}…` : text, 'error');
   }, [notify, secrets]);
 
   useEffect(() => {
@@ -104,6 +108,7 @@ export default function App() {
             servers={servers}
             activeId={session?.server.id ?? null}
             busy={busy}
+            secrets={secrets}
             draft={draft}
             onDraftConsumed={() => setDraft(null)}
             onSave={saveServerList}
