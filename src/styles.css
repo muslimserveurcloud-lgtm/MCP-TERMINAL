@@ -1,0 +1,42 @@
+:root {
+  --bg: #0b1220; --panel: #121b2e; --panel2: #18233b; --line: #24324f;
+  --text: #e6ecf8; --muted: #93a1bd; --accent: #22c55e; --accent2: #16a34a;
+  --danger: #ef4444; --warn: #f59e0b;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+html, body, #root { height: 100%; margin: 0; }
+body { background: var(--bg); color: var(--text); font: 16px/1.45 system-ui, -apple-system, Roboto, sans-serif; }
+.app { display: flex; flex-direction: column; height: 100%; padding-top: env(safe-area-inset-top, 0); }
+.top { padding: 12px 16px; border-bottom: 1px solid var(--line); background: var(--panel); }
+.title { font-weight: 800; letter-spacing: .5px; }
+.sub { font-size: 13px; color: var(--muted); }
+.content { flex: 1; overflow-y: auto; padding: 14px 14px 24px; }
+h2 { font-size: 20px; margin: 4px 0 10px; } h3 { font-size: 16px; margin: 14px 0 6px; }
+.tabs { display: flex; border-top: 1px solid var(--line); background: var(--panel); padding-bottom: env(safe-area-inset-bottom, 0); }
+.tab { flex: 1; background: none; border: 0; color: var(--muted); padding: 8px 2px; font-size: 11px; display: flex; flex-direction: column; align-items: center; gap: 2px; min-height: 52px; }
+.tab .icon { font-size: 20px; } .tab.active { color: var(--accent); }
+.card { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 12px; margin: 10px 0; }
+.card.item { display: flex; flex-direction: column; gap: 4px; width: 100%; text-align: left; color: inherit; font: inherit; }
+.row { display: flex; gap: 8px; align-items: center; } .row.between { justify-content: space-between; } .row.wrap { flex-wrap: wrap; margin-top: 10px; }
+.btn { background: var(--panel2); color: var(--text); border: 1px solid var(--line); border-radius: 10px; padding: 10px 14px; font: inherit; min-height: 44px; }
+.btn.primary { background: var(--accent2); border-color: var(--accent); color: #fff; font-weight: 600; }
+.btn.danger { color: var(--danger); } .btn.ghost { background: none; } .btn.small { min-height: 36px; padding: 6px 10px; font-size: 14px; }
+.btn.block { width: 100%; margin-top: 12px; } .btn:disabled { opacity: .5; }
+.input { width: 100%; background: var(--bg); color: var(--text); border: 1px solid var(--line); border-radius: 10px; padding: 11px 12px; font: inherit; }
+.input:focus { outline: 2px solid var(--accent2); }
+.field { margin: 10px 0; } .field label { display: block; font-size: 14px; color: var(--muted); margin-bottom: 4px; }
+.req { color: var(--danger); font-size: 12px; } .type { color: var(--muted); font-size: 12px; margin-left: 4px; }
+.hint { font-size: 13px; color: var(--muted); margin: 4px 0 0; } .dim { color: var(--muted); font-size: 13px; }
+.muted { color: var(--muted); } .mono, code, pre { font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 13px; }
+.wrap { word-break: break-all; } .pre-wrap { white-space: pre-wrap; } .clamp { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.pre { background: var(--bg); border: 1px solid var(--line); border-radius: 10px; padding: 10px; white-space: pre-wrap; word-break: break-word; overflow-x: auto; }
+.img { max-width: 100%; border-radius: 10px; }
+.badge { background: var(--panel2); border-radius: 999px; padding: 2px 10px; font-size: 12px; color: var(--muted); } .badge.ok { color: var(--accent); }
+.error { color: var(--danger); } .warn { color: var(--warn); } .ok-text { color: var(--accent); font-size: 14px; }
+.switch { display: flex; align-items: center; gap: 8px; color: var(--muted); font-size: 14px; } .switch input { width: 20px; height: 20px; }
+.chips { display: flex; flex-wrap: wrap; gap: 8px; margin: 10px 0; }
+.chip { background: var(--panel2); border: 1px solid var(--line); color: var(--text); border-radius: 999px; padding: 6px 14px; font: inherit; }
+.toast { position: fixed; left: 12px; right: 12px; top: calc(env(safe-area-inset-top, 0) + 64px); z-index: 10; padding: 12px 14px; border-radius: 12px; background: var(--panel2); border: 1px solid var(--accent); }
+.toast.error { border-color: var(--danger); }
+details summary { color: var(--muted); margin: 8px 0; }

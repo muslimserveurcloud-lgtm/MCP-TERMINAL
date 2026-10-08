@@ -1,0 +1,65 @@
+name: Build APK Android
+
+on:
+  push:
+    branches: [main, master]
+    paths-ignore: ['cli/**', '**/*.md']
+  workflow_dispatch:
+
+permissions:
+  contents: write   # nécessaire pour publier l'APK dans les Releases
+
+concurrency:
+  group: android-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  apk:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+
+      - name: Installer les dépendances
+        run: npm install
+
+      - name: Vérification des types (informative)
+        run: npm run typecheck
+        continue-on-error: true
+
+      - name: Construire l'application web
+        run: npm run build
+
+      - name: Générer le projet Android (Capacitor)
+        run: |
+          npx cap add android
+          npx cap sync android
+
+      - name: Compiler l'APK (debug, signé avec la clé de debug)
+        working-directory: android
+        run: ./gradlew assembleDebug --no-daemon
+
+      - name: Nommer l'APK
+        run: cp android/app/build/outputs/apk/debug/app-debug.apk MUSLIM-MCP-TERMINAL.apk
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: MUSLIM-MCP-TERMINAL-apk
+          path: MUSLIM-MCP-TERMINAL.apk
+
+      - name: Publier dans les Releases
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: build-${{ github.run_number }}
+          name: MUSLIM MCP TERMINAL — build ${{ github.run_number }}
+          body: APK Android (debug). Téléchargez MUSLIM-MCP-TERMINAL.apk puis installez-le sur votre téléphone.
+          files: MUSLIM-MCP-TERMINAL.apk
