@@ -63,7 +63,16 @@ export const nativeFetch: FetchLike = async (input, init) => {
     try { data = JSON.parse(data); } catch { /* on garde le texte */ }
   }
 
-  log(`→ ${method} ${where(url)}`);
+  // Méthode JSON-RPC de la requête (initialize, tools/call…) pour le diagnostic ; jamais le contenu.
+  let rpc = '';
+  if (typeof init?.body === 'string') {
+    try {
+      const parsed: unknown = JSON.parse(init.body);
+      rpc = Array.isArray(parsed) ? 'lot' : String((parsed as { method?: unknown }).method ?? 'réponse');
+    } catch { /* corps non JSON */ }
+  }
+  const handshake = /^(initialize|server\/)/.test(rpc);
+  log(`→ ${method} ${where(url)} ${rpc}`.trimEnd());
   try {
     const res = await CapacitorHttp.request({
       url,
@@ -79,7 +88,7 @@ export const nativeFetch: FetchLike = async (input, init) => {
     for (const [key, value] of Object.entries(res.headers ?? {})) {
       try { responseHeaders.set(key, String(value)); } catch { /* en-tête invalide ignoré */ }
     }
-    log(`← ${res.status} ${responseHeaders.get('content-type') ?? ''} (${text.length} car.)${res.status >= 400 ? ` ${text.slice(0, 200)}` : ''}`);
+    log(`← ${res.status} ${responseHeaders.get('content-type') ?? ''} (${text.length} car.)${res.status >= 400 || handshake ? ` ${text.slice(0, 160).replace(/\s+/g, ' ')}` : ''}`);
     return new Response(NULL_BODY_STATUS.has(res.status) ? null : text, { status: res.status, headers: responseHeaders });
   } catch (error) {
     log(`✖ ${method} ${where(url)} : ${describeError(error)}`);

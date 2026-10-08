@@ -42,13 +42,14 @@ export async function connectServer(server: ServerEntry, secrets: Secrets, timeo
   const url = expandRefs(server.url, secrets);
 
   let firstError: unknown;
-  // 1) négociation de protocole automatique du SDK ; 2) repli sur la négociation par défaut pour les serveurs anciens.
-  for (const negotiate of [true, false]) {
+  const attemptTimeout = Math.min(timeoutMs, 20_000);
+  // 1) handshake classique « initialize » (le plus répandu) ; 2) négociation de protocole automatique du SDK.
+  for (const negotiate of [false, true]) {
     log(`Connexion à « ${server.name} » (négociation ${negotiate ? 'automatique' : 'par défaut'})`);
     const client = negotiate ? new Client(CLIENT_INFO, { versionNegotiation: { mode: 'auto' } }) : new Client(CLIENT_INFO);
     const transport = new StreamableHTTPClientTransport(new URL(url), { requestInit: { headers }, fetch: nativeFetch });
     try {
-      await withTimeout(client.connect(transport), timeoutMs, `connexion à « ${server.name} »`);
+      await withTimeout(client.connect(transport), attemptTimeout, `connexion à « ${server.name} »`);
       log(`✔ connecté à « ${server.name} »`);
       return {
         server,
@@ -62,7 +63,8 @@ export async function connectServer(server: ServerEntry, secrets: Secrets, timeo
       log(`✖ échec (${negotiate ? 'auto' : 'défaut'}) : ${describeError(error)}`);
       firstError ??= error;
       try { await client.close(); } catch { /* ignoré */ }
-      if (error instanceof TimeoutError) break;
+      const status = (error as { status?: unknown }).status;
+      if (status === 401 || status === 403) break; // identifiants refusés : inutile de réessayer
     }
   }
   throw firstError;
