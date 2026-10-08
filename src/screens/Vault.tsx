@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { cleanSecret } from '../lib/secrets';
 import type { Secrets } from '../lib/storage';
 
 export function VaultScreen({ secrets, onSave }: { secrets: Secrets; onSave: (secrets: Secrets) => Promise<void> }) {
@@ -9,8 +10,9 @@ export function VaultScreen({ secrets, onSave }: { secrets: Secrets; onSave: (se
   const add = async (): Promise<void> => {
     const key = name.trim();
     if (!/^[A-Za-z_][A-Za-z0-9_]*$/.test(key)) return setError('Nom invalide : lettres, chiffres et _ (ex. GITHUB_TOKEN).');
-    if (!value) return setError('La valeur est vide.');
-    await onSave({ ...secrets, [key]: value });
+    const clean = cleanSecret(value);
+    if (!clean) return setError('La valeur est vide.');
+    await onSave({ ...secrets, [key]: clean });
     setName(''); setValue(''); setError(null);
   };
 
@@ -34,7 +36,7 @@ export function VaultScreen({ secrets, onSave }: { secrets: Secrets; onSave: (se
       {Object.keys(secrets).length === 0 && <p className="muted">Aucun secret enregistré.</p>}
       {Object.keys(secrets).sort().map((key) => (
         <div className="card row between" key={key}>
-          <div><strong className="mono">{key}</strong><div className="dim mono">••••••••</div></div>
+          <div><strong className="mono">{key}</strong><div className="dim mono">{secrets[key]?.slice(0, 4)}••••  ({secrets[key]?.length ?? 0} car.)</div></div>
           <button className="btn danger" onClick={() => void remove(key)}>Supprimer</button>
         </div>
       ))}

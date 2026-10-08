@@ -5,9 +5,12 @@ export const SENSITIVE = /(token|secret|passw(or)?d|api[_-]?key|authorization|cr
 
 export const hasRef = (value: string): boolean => /\$\{[A-Za-z_][A-Za-z0-9_]*\}/.test(value);
 
+/** Nettoie une valeur collée : espaces, retours à la ligne et caractères invisibles en début/fin. */
+export const cleanSecret = (value: string): string => value.replace(/[\u200B-\u200D\uFEFF]/g, '').trim();
+
 export function expandRefs(value: string, secrets: Secrets): string {
   return value.replace(REF, (_match, name: string) => {
-    const secret = secrets[name];
+    const secret = cleanSecret(secrets[name] ?? '');
     if (!secret) throw new Error(`Secret manquant : ${name}. Ajoutez-le dans l'onglet Coffre.`);
     return secret;
   });
